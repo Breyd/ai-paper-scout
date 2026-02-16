@@ -24,6 +24,8 @@ def parse_args() -> argparse.Namespace:
         help="Comma-separated arXiv categories",
     )
     p.add_argument("--polite-sleep", type=float, default=3.0, help="Sleep between API pages (default: 3.0s)")
+    p.add_argument("--pdf", action="store_true", help="Generate PDF report (top N).")
+    p.add_argument("--top-n", type=int, default=30, help="Number of top papers to include in PDF.")
     return p.parse_args()
 
 
@@ -52,6 +54,7 @@ def main() -> int:
         p.spoj_fit_score = fr.score
         p.spoj_fit_tags = fr.tags
         p.spoj_fit_reasons = fr.reasons
+        p.spoj_benchmarks = fr.benchmarks
 
     out_dir = ensure_out_dir()
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -64,6 +67,22 @@ def main() -> int:
         encoding="utf-8",
     )
     write_csv(csv_path, papers)
+
+    if args.pdf:
+        from paper_scout.pdf_report import generate_pdf, ReportMeta
+
+        papers_sorted = sorted(papers, key=lambda x: (getattr(x, "spoj_fit_score", 0) or 0), reverse=True)
+        meta = ReportMeta(
+            generated_at=datetime.now(timezone.utc),
+            window_label=f"last {args.months} months",
+            categories=args.categories,
+            total_papers=len(papers),
+            top_n=args.top_n,
+        )
+        stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M")
+        pdf_path = out_dir / f"report_{stamp}.pdf"
+        generate_pdf(pdf_path, papers_sorted, meta)
+        print(f"Saved PDF report: {pdf_path}")
 
     print(f"Fetched {len(papers)} unique papers (last {args.months} months). Saved: {json_path} and {csv_path}")
     return 0

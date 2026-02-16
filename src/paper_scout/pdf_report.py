@@ -106,7 +106,29 @@ def generate_pdf(
     new_page()
     y = height - margin_y
 
+    # --- TOC (Top titles) ---
+    c.setFont(*H2)
+    c.drawString(margin_x, y, "Top papers (quick list)")
+    y -= 0.8 * cm
+
+    c.setFont(*SMALL)
     for idx, p in enumerate(papers_sorted[: meta.top_n], start=1):
+        if y < (margin_y + 2.5 * cm):
+            new_page()
+            y = height - margin_y
+            c.setFont(*SMALL)
+        score = getattr(p, "spoj_fit_score", 0) or 0
+        title = (p.title or "").strip()
+        line = f"{idx:02d}. [{score:3d}] {title}"
+        # wrap a bit (two lines max)
+        y = _draw_wrapped_text(c, line, margin_x, y, max_w, SMALL[0], SMALL[1], leading=12, max_lines=2)
+        y -= 0.2 * cm
+
+    new_page()
+    y = height - margin_y
+
+    for idx, p in enumerate(papers_sorted[: meta.top_n], start=1):
+
         if y < (margin_y + 6 * cm):
             new_page()
             y = height - margin_y
