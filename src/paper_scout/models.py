@@ -16,3 +16,8 @@ class Paper(BaseModel):
     source: str = "arxiv"
     categories: List[str] = Field(default_factory=list)
     doi: Optional[str] = None
+
+    # SPOJ fit enrichment (added by pipeline)
+    spoj_fit_score: Optional[int] = None
+    spoj_fit_tags: List[str] = Field(default_factory=list)
+    spoj_fit_reasons: List[str] = Field(default_factory=list)
