@@ -18,6 +18,9 @@ CSV_FIELDS = [
     "spoj_fit_score",
     "spoj_fit_tags",
     "spoj_fit_reasons",
+    "primary_contact_name",
+    "primary_contact_hint",
+    "spoj_benchmarks",
     "abstract",
 ]
 
@@ -40,6 +43,9 @@ def write_csv(path: Path, papers: Iterable[Paper]) -> None:
                     "spoj_fit_score": p.spoj_fit_score if p.spoj_fit_score is not None else "",
                     "spoj_fit_tags": "; ".join(p.spoj_fit_tags),
                     "spoj_fit_reasons": " | ".join(p.spoj_fit_reasons),
+                    "primary_contact_name": getattr(p, "primary_contact_name", ""),
+                    "primary_contact_hint": getattr(p, "primary_contact_hint", ""),
+                    "spoj_benchmarks": "; ".join(getattr(p, "spoj_benchmarks", []) or []),
                     "abstract": p.abstract,
                 }
             )

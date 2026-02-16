@@ -21,3 +21,9 @@ class Paper(BaseModel):
     spoj_fit_score: Optional[int] = None
     spoj_fit_tags: List[str] = Field(default_factory=list)
     spoj_fit_reasons: List[str] = Field(default_factory=list)
+
+    # Extracted benchmarks (e.g., SWE-bench, HumanEval)
+    spoj_benchmarks: List[str] = Field(default_factory=list)
+
+    primary_contact_name: str = ""
+    primary_contact_hint: str = ""
