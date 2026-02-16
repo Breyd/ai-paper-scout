@@ -6,18 +6,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
+from paper_scout.dedupe import dedupe_papers
+from paper_scout.export_csv import write_csv
 from paper_scout.sources.arxiv import fetch_arxiv_rss
 
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Daily AI paper scout (MVP)")
-    p.add_argument("--days", type=int, default=1, help="How many days back to include (default: 1)")
-    p.add_argument("--max-results", type=int, default=50, help="Max results per category (default: 50)")
+    p.add_argument("--days", type=int, default=1)
+    p.add_argument("--max-results", type=int, default=50)
     p.add_argument(
         "--categories",
         type=str,
         default="cs.CL,cs.AI,cs.LG",
-        help="Comma-separated arXiv categories (default: cs.CL,cs.AI,cs.LG)",
+        help="Comma-separated arXiv categories",
     )
     return p.parse_args()
 
@@ -33,15 +35,21 @@ def main() -> int:
     categories: List[str] = [c.strip() for c in args.categories.split(",") if c.strip()]
 
     papers = fetch_arxiv_rss(categories=categories, days=args.days, max_results_per_cat=args.max_results)
+    papers = dedupe_papers(papers)
 
     out_dir = ensure_out_dir()
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    out_path = out_dir / f"raw_papers_{today}.json"
 
-    payload = [p.model_dump(mode="json") for p in papers]
-    out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    json_path = out_dir / f"raw_papers_{today}.json"
+    csv_path = out_dir / f"raw_papers_{today}.csv"
 
-    print(f"Fetched {len(papers)} papers. Saved: {out_path}")
+    json_path.write_text(
+        json.dumps([p.model_dump(mode="json") for p in papers], ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    write_csv(csv_path, papers)
+
+    print(f"Fetched {len(papers)} unique papers. Saved: {json_path} and {csv_path}")
     return 0
 
 
