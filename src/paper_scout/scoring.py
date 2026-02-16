@@ -22,7 +22,6 @@ def _hit(text: str, patterns: List[str]) -> bool:
     return any(re.search(p, text) for p in patterns)
 
 
-# Strong signals that SPOJ-like submission+verdict+code data is directly useful
 CORE_CODE_PATTERNS = [
     r"\bcode generation\b",
     r"\bprogram synthesis\b",
@@ -48,7 +47,6 @@ CORE_CODE_PATTERNS = [
     r"\bcuda\b",
 ]
 
-# Medium signals: could be relevant but often creates false positives alone
 SOFT_REASONING_PATTERNS = [
     r"\breasoning\b",
     r"\bplanning\b",
@@ -100,8 +98,6 @@ def score_spoj_fit(p: Paper) -> FitResult:
          "Touches multiple programming languages (SPOJ is multi-language)."),
     ]
 
-    # Penalize “application domains” that frequently create false positives,
-    # unless there is a core code signal (then we keep it).
     negative_rules: List[Tuple[str, List[str], int, str]] = [
         ("aerospace_robotics", [r"\buav\b", r"\bairspace\b", r"\bflight\b", r"\bpreflight\b",
                                r"\brobot\b", r"\bmanipulation\b", r"\bgrasp(ing)?\b", r"\btrajectory\b", r"\bcontrol\b"], -25,
@@ -110,7 +106,7 @@ def score_spoj_fit(p: Paper) -> FitResult:
          "Primarily NLP extraction; less aligned with code + verdict training."),
         ("climate_geo", [r"\bclimate\b", r"\bprecipitation\b", r"\bhydro\b", r"\briver basin\b", r"\bcmip\b"], -35,
          "Climate/earth-science focus; unlikely to need SPOJ-like data."),
-        ("medical_signals", [r"\becg\b", r"\beeg\b"\bppg\b", r"\bclinical\b", r"\bpatient\b", r"\bmedical\b"], -35,
+        ("medical_signals", [r"\becg\b", r"\beeg\b", r"\bppg\b", r"\bclinical\b", r"\bpatient\b", r"\bmedical\b"], -35,
          "Medical/signal processing focus; unlikely to need SPOJ-like data."),
         ("vision_video", [r"\bvideo\b", r"\bcodec\b", r"\bkeyframe\b", r"\bmotion vectors\b", r"\bimage encoder\b"], -20,
          "Video/vision infrastructure; weak link to code-judge training."),
@@ -129,18 +125,15 @@ def score_spoj_fit(p: Paper) -> FitResult:
             tags.append(tag)
             reasons_pos.append(reason)
 
-    # Negatives apply strongly only when there's no core code signal
     for tag, patterns, pts, reason in negative_rules:
         if _hit(text, patterns):
             if core_code_signal:
-                # soften penalty if core code signal exists
                 score += int(pts / 2)
             else:
                 score += pts
             tags.append(tag)
             reasons_neg.append(reason)
 
-    # Gate: without core code signal, don't allow high scores
     if not core_code_signal:
         score = min(score, 35)
 
