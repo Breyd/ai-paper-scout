@@ -10,6 +10,7 @@ from paper_scout.dedupe import dedupe_papers
 from paper_scout.export_csv import write_csv
 from paper_scout.scoring import score_spoj_fit
 from paper_scout.sources.arxiv_api import fetch_arxiv_api
+from paper_scout.linkedin_search import add_linkedin_search_fields
 from paper_scout.contacts import pick_primary_contact
 
 
@@ -59,6 +60,7 @@ def main() -> int:
         name, hint = pick_primary_contact(p)
         p.primary_contact_name = name
         p.primary_contact_hint = hint
+        add_linkedin_search_fields(p)
 
     out_dir = ensure_out_dir()
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")

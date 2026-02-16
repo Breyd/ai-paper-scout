@@ -20,6 +20,8 @@ CSV_FIELDS = [
     "spoj_fit_reasons",
     "primary_contact_name",
     "primary_contact_hint",
+    "linkedin_search_url",
+    "linkedin_search_disclaimer",
     "spoj_benchmarks",
     "abstract",
 ]
@@ -45,6 +47,8 @@ def write_csv(path: Path, papers: Iterable[Paper]) -> None:
                     "spoj_fit_reasons": " | ".join(p.spoj_fit_reasons),
                     "primary_contact_name": getattr(p, "primary_contact_name", ""),
                     "primary_contact_hint": getattr(p, "primary_contact_hint", ""),
+                    "linkedin_search_url": getattr(p, "linkedin_search_url", ""),
+                    "linkedin_search_disclaimer": getattr(p, "linkedin_search_disclaimer", ""),
                     "spoj_benchmarks": "; ".join(getattr(p, "spoj_benchmarks", []) or []),
                     "abstract": p.abstract,
                 }

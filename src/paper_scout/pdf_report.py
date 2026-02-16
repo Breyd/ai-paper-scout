@@ -102,6 +102,8 @@ def generate_pdf(
 
     c.setFont(*SMALL)
     c.drawString(margin_x, y, "Scoring: heuristic fit for SPOJ-like code+verdict datasets.")
+    y -= 0.6 * cm
+    c.drawString(margin_x, y, "LinkedIn search links are auto-generated (not verified). Please confirm manually.")
     y -= 1.0 * cm
 
     new_page()
@@ -191,6 +193,19 @@ def generate_pdf(
         for b in pitch_bullets:
             y = _draw_wrapped_text(c, f"- {b}", margin_x + 0.8 * cm, y, max_w - 0.8 * cm, SMALL[0], SMALL[1], leading=12, max_lines=2)
         y -= 0.2 * cm
+
+        # LinkedIn search (auto)
+        li = getattr(p, "linkedin_search_url", "") or ""
+        if li:
+            c.setFont(*SMALL)
+            c.drawString(margin_x, y, "LinkedIn search:")
+            link_x = margin_x + 2.6 * cm
+            c.drawString(link_x, y, li)
+            try:
+                c.linkURL(li, (link_x, y - 2, link_x + max_w, y + 10), relative=0)
+            except Exception:
+                pass
+            y -= 0.6 * cm
 
         url = p.url or ""
         if url:

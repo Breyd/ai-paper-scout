@@ -27,3 +27,7 @@ class Paper(BaseModel):
 
     primary_contact_name: str = ""
     primary_contact_hint: str = ""
+
+    linkedin_search_query: str = ""
+    linkedin_search_url: str = ""
+    linkedin_search_disclaimer: str = ""
