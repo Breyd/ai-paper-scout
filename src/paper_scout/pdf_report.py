@@ -11,6 +11,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
 from paper_scout.models import Paper
+from paper_scout.pitch import build_spoj_pitch
 
 
 @dataclass
@@ -182,6 +183,14 @@ def generate_pdf(
             y = _draw_wrapped_text(c, "Reasons:", margin_x, y, max_w, SMALL[0], SMALL[1], leading=12)
             for r in reasons[:3]:
                 y = _draw_wrapped_text(c, f"- {r}", margin_x + 0.4 * cm, y, max_w - 0.4 * cm, SMALL[0], SMALL[1], leading=12)
+
+        # SPOJ pitch angle (deterministic)
+        pitch_one, pitch_bullets = build_spoj_pitch(p)
+        y = _draw_wrapped_text(c, "SPOJ angle:", margin_x, y, max_w, SMALL[0], SMALL[1], leading=12)
+        y = _draw_wrapped_text(c, pitch_one, margin_x + 0.4 * cm, y, max_w - 0.4 * cm, SMALL[0], SMALL[1], leading=12, max_lines=3)
+        for b in pitch_bullets:
+            y = _draw_wrapped_text(c, f"- {b}", margin_x + 0.8 * cm, y, max_w - 0.8 * cm, SMALL[0], SMALL[1], leading=12, max_lines=2)
+        y -= 0.2 * cm
 
         url = p.url or ""
         if url:
